@@ -22,9 +22,9 @@ function appendMovie(movie, element) {
   new ElementBuilder("article").id(movie.imdbID)
           .append(new ElementBuilder("img").with("src", movie.Poster))
           .append(new ElementBuilder("h1").text(movie.Title))
-          .append(new ElementBuilder("p")
-              .append(new ElementBuilder("button").text("Edit")
-                    .listener("click", () => location.href = "edit.html?imdbID=" + movie.imdbID)))
+            .append(new ElementBuilder("button").text("Edit")
+                .class("pretty-btn")
+                .listener("click", () => location.href = "edit.html?imdbID=" + movie.imdbID))
           .append(new ParagraphBuilder().items(
               "Runtime " + formatRuntime(movie.Runtime),
               "\u2022",
@@ -52,8 +52,9 @@ function loadMovies(genre) {
 
     if (xhr.status === 200) {
       const movies = JSON.parse(xhr.responseText)
-      for (const movie of movies) {
-        appendMovie(movie, mainElement)
+        for (const movie of movies) {
+ //       if ((movie.Genres.includes(genre)) || (genre === "All")) {
+          appendMovie(movie, mainElement)        
       }
     } else {
       mainElement.append(`Daten konnten nicht geladen werden, Status ${xhr.status} - ${xhr.statusText}`);
@@ -61,8 +62,9 @@ function loadMovies(genre) {
   }
 
   const url = new URL("/movies", location.href)
-  /* Task 1.4. Add query parameter to the url if a genre is given */
-
+  /* Task 1.4. Add query parameter to the url if a genre is given (Mcdonalds) */
+  url.searchParams.set("genre", genre);
+  
   xhr.open("GET", url)
   xhr.send()
 }
@@ -72,11 +74,38 @@ window.onload = function () {
   xhr.onload = function () {
     const listElement = document.querySelector("nav>ul");
 
+
     if (xhr.status === 200) {
       /* Task 1.3. Add the genre buttons to the listElement and 
          initialize them with a click handler that calls the 
          loadMovies(...) function above. */
+
+      //All
+      const liAll = document.createElement("li")
+      const buttonall = document.createElement("button");
+      buttonall.textContent = "All"
+      buttonall.addEventListener("click", function () {
+        loadMovies("All")
+        });
+      buttonall.classList.add("genre");
+      liAll.appendChild(buttonall);
+      listElement.appendChild(liAll);
+
+      //genres
       const genres = JSON.parse(xhr.responseText);
+      for(let genre of genres) {
+        const buttongenre = document.createElement("button");
+        const ligenres = document.createElement("li")
+        buttongenre.textContent = genre
+        buttongenre.addEventListener("click", function () {
+          loadMovies(genre)
+        });
+        buttongenre.classList.add("genre");
+        ligenres.appendChild(buttongenre);
+        listElement.appendChild(ligenres);
+        
+      } 
+
 
       /* When a first button exists, we click it to load all movies. */
       const firstButton = document.querySelector("nav button");

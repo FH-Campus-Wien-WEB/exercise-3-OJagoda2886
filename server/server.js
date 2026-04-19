@@ -16,13 +16,36 @@ app.use(express.static(path.join(__dirname, 'files')));
    that are currently in the movie model.
 */
 
+app.get('/genres', function (req, res) {
+  let movies = Object.values(movieModel)
+  let genres = [] 
+  
+  for (let movie of movies) {
+    genres = genres.concat(movie["Genres"]);
+    }
+  
+  const unique = [...new Set(genres)];
+  unique.sort()
+  res.send(unique)
+})
+
 /* Task 1.4: Extend the GET /movies endpoint:
    When a query parameter for a specific genre is given, 
    return only movies that have the given genre
+
+   But it could be done in loadmovies function too
  */
 app.get('/movies', function (req, res) {
+  const genre = req.query.genre;
   let movies = Object.values(movieModel)
-  res.send(movies);
+  let finalmovies = []
+  for (const movie of movies) {
+    //The first one is if genre is missing or empty
+    if (!genre || genre === "All" || movie.Genres.includes(genre)) {
+      finalmovies.push(movie)
+    }
+  }
+  res.send(finalmovies);
 })
 
 // Configure a 'get' endpoint for a specific movie
